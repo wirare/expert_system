@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:16 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/21 22:58:19 by ellanglo         ###   ########.fr       */
+/*   Updated: 2025/05/24 01:08:49 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "parsing.hpp"
@@ -14,7 +14,6 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-
 
 std::ifstream openFile(char *filename)
 {
@@ -43,10 +42,10 @@ int main(int argc, char **argv)
         std::cerr << "Tokenizer error: " << e.what() << '\n';
         return 1;
     }
-	for (Token elem : Tokens)
-	{
-		std::cout << elem << " ";
+	try { GrammarVerifyPar(Tokens); }
+	catch (const std::runtime_error& e) {
+		std::cerr << "Grammar error: " << e.what() << '\n';
+		return 1;
 	}
-	std::cout << std::endl;
 	return 0;
 }

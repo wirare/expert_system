@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:16 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/21 22:58:19 by ellanglo         ###   ########.fr       */
+/*   Updated: 2025/05/24 00:48:23 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "parsing.hpp"
@@ -26,7 +26,7 @@ void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens)
 	while (std::getline(file, line))
 	{
         lineNumber++;
-		for ( std::string::iterator it=line.begin(); it!=line.end(); ++it)
+		for ( auto it=line.begin(); it!=line.end(); ++it)
         {
             if (commentFlag && *it == '$')
                 commentFlag = false;

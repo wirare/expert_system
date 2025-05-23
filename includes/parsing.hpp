@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:15 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/22 18:20:46 by ellanglo         ###   ########.fr       */
+/*   Updated: 2025/05/24 01:07:56 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #pragma once
@@ -55,25 +55,30 @@ typedef enum
 
 #define MatchFuncNb 11
 
-#define GrammarTable {																				\
-	{TOKEN_SYMBOL, TOKEN_XOR | TOKEN_OR | TOKEN_AND | TOKEN_IFF | TOKEN_THEN | TOKEN_NL | TOKEN_RP}	\
-	{TOKEN_NOT, TOKEN_SYMBOL | TOKEN_LP}															\
-	{TOKEN_XOR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP}												\
-	{TOKEN_OR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP}													\
-	{TOKEN_AND, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP}												\
-	{TOKEN_QUERY, TOKEN_SYMBOL}																		\
-	{TOKEN_THEN, TOKEN_NOT | TOKEN_SYMBOL}															\
-	{TOKEN_IFF, TOKEN_LP | TOKEN_SYMBOL | TOKEN_NOT}												\
-	{TOKEN_EQ, TOKEN_SYMBOL}																		\
-	{TOKEN_LP, TOKEN_NOT | TOKEN_SYMBOL}															\
-	{TOKEN_RP, TOKEN_THEN | TOKEN_IFF | TOKEN_OR | TOKEN_XOR | TOKEN_AND | TOKEN_NL}				\
-}
-
 typedef int (*MatchFuncPtr)(std::string);
 typedef struct {
 	Token_type type;
 	MatchFuncPtr func;
 } MatchEntry;
+
+#define GrammarTable {																				\
+	{TOKEN_SYMBOL, TOKEN_XOR | TOKEN_OR | TOKEN_AND | TOKEN_IFF | TOKEN_THEN | TOKEN_NL | TOKEN_RP},\
+	{TOKEN_NOT, TOKEN_SYMBOL | TOKEN_LP},															\
+	{TOKEN_XOR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},												\
+	{TOKEN_OR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},												\
+	{TOKEN_AND, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},												\
+	{TOKEN_QUERY, TOKEN_SYMBOL},																	\
+	{TOKEN_THEN, TOKEN_NOT | TOKEN_SYMBOL},															\
+	{TOKEN_IFF, TOKEN_LP | TOKEN_SYMBOL | TOKEN_NOT},												\
+	{TOKEN_EQ, TOKEN_SYMBOL},																		\
+	{TOKEN_LP, TOKEN_NOT | TOKEN_SYMBOL},															\
+	{TOKEN_RP, TOKEN_THEN | TOKEN_IFF | TOKEN_OR | TOKEN_XOR | TOKEN_AND | TOKEN_NL}				\
+}
+
+typedef struct {
+	Token_type	type;
+	int			next;
+} GrammarEntry;
 
 class Token
 {
@@ -203,3 +208,4 @@ inline std::string TokenTypeToStr(const Token &token)
 }
 
 void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens);
+void GrammarVerifyPar(std::vector<Token> &Tokens);
