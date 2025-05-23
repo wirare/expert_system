@@ -1,0 +1,18 @@
+[
+ {
+  "directory": "/home/ellanglo/new_project/expert_system",
+  "arguments": [
+   "g++",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-std=c++17",
+   "-Iincludes",
+   "-c",
+   "srcs/parsing.cpp",
+   "-o",
+   ".objs/parsing.o"
+  ],
+  "file": "srcs/parsing.cpp"
+ }
+]
