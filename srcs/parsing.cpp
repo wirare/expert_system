@@ -51,5 +51,6 @@ int main(int argc, char **argv)
 		std::cerr << "Grammar error: " << e.what() << '\n';
 		return 1;
 	}
+	std::cout << Token(TOKEN_SYMBOL, 'T') << std::endl;
 	return 0;
 }

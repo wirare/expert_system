@@ -39,6 +39,8 @@ typedef enum
 	TOKEN_NL = 1 << 9,
 	TOKEN_LP = 1 << 10,
 	TOKEN_RP = 1 << 11,
+	TOKEN_START = 1 << 12,
+	TOKEN_END = 1 << 13,
 }	Token_type;
 
 #define MatchFunc { 			\
@@ -62,28 +64,6 @@ typedef struct {
 	Token_type type;
 	MatchFuncPtr func;
 } MatchEntry;
-
-#define GrammarTable {																				\
-	{TOKEN_SYMBOL, TOKEN_XOR | TOKEN_OR | TOKEN_AND | TOKEN_IFF | TOKEN_THEN | TOKEN_NL | TOKEN_RP},\
-	{TOKEN_NOT, TOKEN_SYMBOL | TOKEN_LP},															\
-	{TOKEN_XOR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},												\
-	{TOKEN_OR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},												\
-	{TOKEN_AND, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},												\
-	{TOKEN_QUERY, TOKEN_SYMBOL},																	\
-	{TOKEN_THEN, TOKEN_NOT | TOKEN_SYMBOL},															\
-	{TOKEN_IFF, TOKEN_LP | TOKEN_SYMBOL | TOKEN_NOT},												\
-	{TOKEN_FACT, TOKEN_SYMBOL},																		\
-	{TOKEN_LP, TOKEN_NOT | TOKEN_SYMBOL},															\
-	{TOKEN_RP, TOKEN_THEN | TOKEN_IFF | TOKEN_OR | TOKEN_XOR | TOKEN_AND | TOKEN_NL},				\
-	{TOKEN_NL, TOKEN_SYMBOL | TOKEN_LP | TOKEN_NOT | TOKEN_FACT | TOKEN_QUERY},						\
-}
-
-#define GrammarTableEntry 12
-
-typedef struct {
-	Token_type	type;
-	int			next;
-} GrammarEntry;
 
 class Token
 {
@@ -167,20 +147,18 @@ inline int isRP(std::string str)
 	return (str[0] == ')');
 }
 
+#define TYPE_TO_STR(Type) case TOKEN_##Type : return "TOKEN_"#Type;
+
 inline std::string TokenTypeToStr(const Token &token)
 {
 	std::string str;
 	switch (token.getType())
 	{
-		case TOKEN_DFLT:
-			str = "TOKEN_DFLT";
-			break;
+		TYPE_TO_STR(DFLT)
 		case TOKEN_FACT:
 			str = "TOKEN_FACT";
 			break;
-		case TOKEN_SYMBOL:
-			str = "TOKEN_SYMBOL";
-			break;
+		TYPE_TO_STR(SYMBOL)
 		case TOKEN_THEN:
 			str = "TOKEN_THEN";
 			break;
@@ -205,6 +183,7 @@ inline std::string TokenTypeToStr(const Token &token)
 		case TOKEN_NL:
 			str = "TOKEN_NL";
 			break;
+		TYPE_TO_STR(END)
 		default:
 			str = "UNKNOWN_TOKEN";
 			break;
