@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:15 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/24 01:07:56 by wirare           ###   ########.fr       */
+/*   Updated: 2025/05/24 04:58:38 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #pragma once
@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 #define SETGET(type, _name, Name) 											\
 	public: 																\
@@ -25,7 +27,7 @@
 typedef enum
 {
 	TOKEN_DFLT = 0,
-	TOKEN_EQ = 1 << 0,
+	TOKEN_FACT = 1 << 0,
 	TOKEN_SYMBOL = 1 << 1,
 	TOKEN_THEN = 1 << 2,
 	TOKEN_IFF = 1 << 3,
@@ -48,7 +50,7 @@ typedef enum
 	{TOKEN_QUERY, isQuery},		\
 	{TOKEN_THEN, isThen},		\
 	{TOKEN_IFF, isIff},			\
-	{TOKEN_EQ, isEq},			\
+	{TOKEN_FACT, isFact},		\
 	{TOKEN_LP, isLP},			\
 	{TOKEN_RP, isRP},			\
 }
@@ -70,10 +72,13 @@ typedef struct {
 	{TOKEN_QUERY, TOKEN_SYMBOL},																	\
 	{TOKEN_THEN, TOKEN_NOT | TOKEN_SYMBOL},															\
 	{TOKEN_IFF, TOKEN_LP | TOKEN_SYMBOL | TOKEN_NOT},												\
-	{TOKEN_EQ, TOKEN_SYMBOL},																		\
+	{TOKEN_FACT, TOKEN_SYMBOL},																		\
 	{TOKEN_LP, TOKEN_NOT | TOKEN_SYMBOL},															\
-	{TOKEN_RP, TOKEN_THEN | TOKEN_IFF | TOKEN_OR | TOKEN_XOR | TOKEN_AND | TOKEN_NL}				\
+	{TOKEN_RP, TOKEN_THEN | TOKEN_IFF | TOKEN_OR | TOKEN_XOR | TOKEN_AND | TOKEN_NL},				\
+	{TOKEN_NL, TOKEN_SYMBOL | TOKEN_LP | TOKEN_NOT | TOKEN_FACT | TOKEN_QUERY},						\
 }
+
+#define GrammarTableEntry 12
 
 typedef struct {
 	Token_type	type;
@@ -103,7 +108,7 @@ inline std::ostream &operator<<(std::ostream &os, const Token &token) {
 	return os;
 }
 
-inline int isEq(std::string str)
+inline int isFact(std::string str)
 {
     return (str[0] == '=');
 }
@@ -170,8 +175,8 @@ inline std::string TokenTypeToStr(const Token &token)
 		case TOKEN_DFLT:
 			str = "TOKEN_DFLT";
 			break;
-		case TOKEN_EQ:
-			str = "TOKEN_EQ";
+		case TOKEN_FACT:
+			str = "TOKEN_FACT";
 			break;
 		case TOKEN_SYMBOL:
 			str = "TOKEN_SYMBOL";
@@ -207,5 +212,14 @@ inline std::string TokenTypeToStr(const Token &token)
 	return str;
 }
 
+inline void ParsingThrow(const std::string& msg, int line)
+{
+	std::ostringstream oss;
+	oss << msg << " at line " << line;
+	throw std::runtime_error(oss.str());
+}
+
+void CheckConditionalToken(std::vector<Token> &Tokens);
 void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens);
 void GrammarVerifyPar(std::vector<Token> &Tokens);
+void CheckFactQueryToken(std::vector<Token> Tokens);

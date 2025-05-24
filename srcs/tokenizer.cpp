@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:16 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/24 00:48:23 by wirare           ###   ########.fr       */
+/*   Updated: 2025/05/24 04:32:52 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "parsing.hpp"
@@ -14,8 +14,6 @@
 #include <cctype>
 #include <fstream>
 #include <vector>
-#include <stdexcept>
-#include <sstream>
 
 void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens)
 {
@@ -46,12 +44,7 @@ void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens)
                 }
             }
             if (!res && !commentFlag)
-            {
-                std::ostringstream oss;
-                oss << "Parsing error: unexpected character '" << *it
-                    << "' at line " << lineNumber;
-                throw std::runtime_error(oss.str());
-            }
+				ParsingThrow("Unexpected character", lineNumber);
         }
         if (Tokens.size() && Tokens.back().getType() != TOKEN_NL)
             Tokens.push_back(Token(TOKEN_NL, '/'));
