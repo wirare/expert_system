@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:16 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/24 04:58:54 by wirare           ###   ########.fr       */
+/*   Updated: 2025/05/26 04:32:58 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "parsing.hpp"
@@ -46,11 +46,11 @@ int main(int argc, char **argv)
 		GrammarVerifyPar(Tokens);
 		CheckConditionalToken(Tokens);
 		CheckFactQueryToken(Tokens);
+		CheckGrammar(Tokens);
 	}
 	catch (const std::runtime_error& e) {
 		std::cerr << "Grammar error: " << e.what() << '\n';
 		return 1;
 	}
-	std::cout << Token(TOKEN_SYMBOL, 'T') << std::endl;
 	return 0;
 }

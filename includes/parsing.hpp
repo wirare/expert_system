@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:15 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/24 04:58:38 by wirare           ###   ########.fr       */
+/*   Updated: 2025/05/26 04:16:50 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #pragma once
@@ -43,6 +43,8 @@ typedef enum
 	TOKEN_END = 1 << 13,
 }	Token_type;
 
+#define NB_TOKEN = 15;
+
 #define MatchFunc { 			\
 	{TOKEN_SYMBOL, isSymbol},	\
 	{TOKEN_XOR, isXor},			\
@@ -65,12 +67,38 @@ typedef struct {
 	MatchFuncPtr func;
 } MatchEntry;
 
+#define TYPE_TO_STR(Type) case TOKEN_##Type : return "TOKEN_"#Type;
+
 class Token
 {
 	SETGET(Token_type, _type, Type);
 	SETGET(char, _value, Value);
 
 	public:
+		std::string toString(void) const 
+		{
+			switch (_type) 
+			{
+				TYPE_TO_STR(DFLT)
+				TYPE_TO_STR(FACT)
+				TYPE_TO_STR(SYMBOL)
+				TYPE_TO_STR(THEN)
+				TYPE_TO_STR(LP)
+				TYPE_TO_STR(RP)
+				TYPE_TO_STR(IFF)
+				TYPE_TO_STR(XOR)
+				TYPE_TO_STR(AND)
+				TYPE_TO_STR(OR)
+				TYPE_TO_STR(NOT)
+				TYPE_TO_STR(QUERY)
+				TYPE_TO_STR(NL)
+				TYPE_TO_STR(START)
+				TYPE_TO_STR(END)
+				default:
+					return "UNKNOWN";
+			}
+		}
+
 		Token() {
 			_type = TOKEN_DFLT;
 			_value = '*';
@@ -81,9 +109,8 @@ class Token
 		};
 		~Token() {};
 };
-inline std::string TokenTypeToStr(const Token &token);
 inline std::ostream &operator<<(std::ostream &os, const Token &token) {
-	os << "Token type : " << TokenTypeToStr(token) << std::endl;
+	os << "Token type : " << token.toString() << std::endl;
 	os << "Token value : " << token.getValue() << std::endl;
 	return os;
 }
@@ -147,49 +174,6 @@ inline int isRP(std::string str)
 	return (str[0] == ')');
 }
 
-#define TYPE_TO_STR(Type) case TOKEN_##Type : return "TOKEN_"#Type;
-
-inline std::string TokenTypeToStr(const Token &token)
-{
-	std::string str;
-	switch (token.getType())
-	{
-		TYPE_TO_STR(DFLT)
-		case TOKEN_FACT:
-			str = "TOKEN_FACT";
-			break;
-		TYPE_TO_STR(SYMBOL)
-		case TOKEN_THEN:
-			str = "TOKEN_THEN";
-			break;
-		case TOKEN_IFF:
-			str = "TOKEN_IFF";
-			break;
-		case TOKEN_XOR:
-			str = "TOKEN_XOR";
-			break;
-		case TOKEN_AND:
-			str = "TOKEN_AND";
-			break;
-		case TOKEN_OR:
-			str = "TOKEN_OR";
-			break;
-		case TOKEN_NOT:
-			str = "TOKEN_NOT";
-			break;
-		case TOKEN_QUERY:
-			str = "TOKEN_QUERY";
-			break;
-		case TOKEN_NL:
-			str = "TOKEN_NL";
-			break;
-		TYPE_TO_STR(END)
-		default:
-			str = "UNKNOWN_TOKEN";
-			break;
-	}
-	return str;
-}
 
 inline void ParsingThrow(const std::string& msg, int line)
 {
@@ -202,3 +186,4 @@ void CheckConditionalToken(std::vector<Token> &Tokens);
 void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens);
 void GrammarVerifyPar(std::vector<Token> &Tokens);
 void CheckFactQueryToken(std::vector<Token> Tokens);
+void CheckGrammar(std::vector<Token> &Tokens);

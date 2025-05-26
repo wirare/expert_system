@@ -6,7 +6,7 @@
 /*   By: ellanglo <ellanglo@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 22:35:16 by ellanglo          #+#    #+#             */
-/*   Updated: 2025/05/24 04:32:52 by wirare           ###   ########.fr       */
+/*   Updated: 2025/05/26 04:24:37 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "parsing.hpp"
@@ -21,9 +21,9 @@ void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens)
     MatchEntry matchTable[MatchFuncNb] = MatchFunc;
     bool commentFlag = false;
     int lineNumber = 0;
+	Tokens.push_back(Token(TOKEN_START, 'S'));
 	while (std::getline(file, line))
 	{
-        lineNumber++;
 		for ( auto it=line.begin(); it!=line.end(); ++it)
         {
             if (commentFlag && *it == '$')
@@ -46,7 +46,9 @@ void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens)
             if (!res && !commentFlag)
 				ParsingThrow("Unexpected character", lineNumber);
         }
-        if (Tokens.size() && Tokens.back().getType() != TOKEN_NL)
+        if (Tokens.size() - 1 && Tokens.back().getType() != TOKEN_NL)
             Tokens.push_back(Token(TOKEN_NL, '/'));
+        lineNumber++;
 	}
+	Tokens.push_back(Token(TOKEN_END, 'E'));
 }
