@@ -1,6 +1,6 @@
 [
  {
-  "directory": "/home/ellanglo/new_project/expert_system",
+  "directory": "/home/ellanglo/Project/expert_system",
   "arguments": [
    "g++",
    "-Wall",
@@ -8,11 +8,80 @@
    "-Werror",
    "-std=c++17",
    "-Iincludes",
+   "-g",
    "-c",
    "srcs/parsing.cpp",
    "-o",
    ".objs/parsing.o"
   ],
   "file": "srcs/parsing.cpp"
+ },
+ {
+  "directory": "/home/ellanglo/Project/expert_system",
+  "arguments": [
+   "g++",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-std=c++17",
+   "-Iincludes",
+   "-g",
+   "-c",
+   "srcs/build_ast.cpp",
+   "-o",
+   ".objs/build_ast.o"
+  ],
+  "file": "srcs/build_ast.cpp"
+ },
+ {
+  "directory": "/home/ellanglo/Project/expert_system",
+  "arguments": [
+   "g++",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-std=c++17",
+   "-Iincludes",
+   "-g",
+   "-c",
+   "srcs/grammar_analyzer.cpp",
+   "-o",
+   ".objs/grammar_analyzer.o"
+  ],
+  "file": "srcs/grammar_analyzer.cpp"
+ },
+ {
+  "directory": "/home/ellanglo/Project/expert_system",
+  "arguments": [
+   "g++",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-std=c++17",
+   "-Iincludes",
+   "-g",
+   "-c",
+   "srcs/main.cpp",
+   "-o",
+   ".objs/main.o"
+  ],
+  "file": "srcs/main.cpp"
+ },
+ {
+  "directory": "/home/ellanglo/Project/expert_system",
+  "arguments": [
+   "g++",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-std=c++17",
+   "-Iincludes",
+   "-g",
+   "-c",
+   "srcs/tokenizer.cpp",
+   "-o",
+   ".objs/tokenizer.o"
+  ],
+  "file": "srcs/tokenizer.cpp"
  }
 ]

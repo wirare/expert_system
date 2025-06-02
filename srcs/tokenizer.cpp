@@ -9,13 +9,13 @@
 /*   Updated: 2025/05/26 04:24:37 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+#include "expert_system.hpp"
 #include "parsing.hpp"
 
 #include <cctype>
 #include <fstream>
-#include <vector>
 
-void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens)
+void Tokenizer(std::ifstream& file, Tvector& Tokens)
 {
 	std::string line;
     MatchEntry matchTable[MatchFuncNb] = MatchFunc;

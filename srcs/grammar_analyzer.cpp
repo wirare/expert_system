@@ -9,12 +9,14 @@
 /*   Updated: 2025/05/26 04:32:49 by wirare           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+#include "err_msg.hpp"
 #include "parsing.hpp"
+#include "expert_system.hpp"
 
-#include <vector>
-#include <unordered_map>
+#include <map>
+#include <set>
 
-void GrammarVerifyPar(std::vector<Token> &Tokens)
+void GrammarVerifyPar(Tvector &Tokens)
 {
 	int parCount = 0;
 	int nb_line = 0;
@@ -24,14 +26,14 @@ void GrammarVerifyPar(std::vector<Token> &Tokens)
 		if (type == TOKEN_NL)
 		{
 			if (parCount != 0)
-				ParsingThrow("Unmatched closing parenthesis", nb_line);
+				ParsingThrow(PAR_UNMATCH_CLOSE, nb_line);
 			nb_line++;
 			continue;
 		}
 		if (type & (TOKEN_THEN | TOKEN_IFF))
 		{
 			if (parCount != 0)
-				ParsingThrow("Conditional token in between parenthesis", nb_line);
+				ParsingThrow(PAR_COND_IN, nb_line);
 			continue;
 		}
 		if (type == TOKEN_LP)
@@ -40,12 +42,12 @@ void GrammarVerifyPar(std::vector<Token> &Tokens)
 		{
 			parCount--;
 			if (parCount < 0)
-				ParsingThrow("Unmatched opening parenthesis", nb_line);
+				ParsingThrow(PAR_UNMATCH_OPEN, nb_line);
 		}
 	}
 }
 
-void CheckConditionalToken(std::vector<Token> &Tokens)
+void CheckConditionalToken(Tvector &Tokens)
 {
 	bool found = false;
 	int nb_line = 0;
@@ -61,7 +63,7 @@ void CheckConditionalToken(std::vector<Token> &Tokens)
 		if (type == TOKEN_NL)
 		{
 			if (!found && !isFactQuery)
-				ParsingThrow("Missing conditional token", nb_line);
+				ParsingThrow(COND_MISSING, nb_line);
 			found = false;
 			isFactQuery = false;
 			nb_line++;
@@ -70,49 +72,92 @@ void CheckConditionalToken(std::vector<Token> &Tokens)
 		if (type & (TOKEN_THEN | TOKEN_IFF))
 		{
 			if (found)
-				ParsingThrow("Too many conditional tokens", nb_line);
+				ParsingThrow(COND_TOO_MANY, nb_line);
 			found = true;
 			continue;
 		}
 	}
 }
 
-void CheckFactQueryToken(std::vector<Token> Tokens)
+int CheckFact(Tvector Tokens)
 {
 	int factFound = -1;
-	int queryFound = -1;
+	bool inFact = false;
 	int nb_line = 0;
+	std::set<char> symbols;
 	for (Token token: Tokens)
 	{
 		Token_type type = token.getType();
 		if (type == TOKEN_FACT)
 		{
 			if (factFound >= 0)
-				ParsingThrow("Two or more Fact founds", nb_line);
+				ParsingThrow(FACT_TOO_MANY, nb_line);
 			factFound = nb_line;
-			if (queryFound == factFound)
-				ParsingThrow("Fact and Query can't be on the same line", nb_line);
-			continue ;
-		}
-		if (type == TOKEN_QUERY)
-		{
-			if (queryFound >= 0)
-				ParsingThrow("Two or more Query founds", nb_line);
-			queryFound = nb_line;
-			if (queryFound == factFound)
-				ParsingThrow("Fact and Query can't be on the same line", nb_line);
+			inFact = true ;
 			continue ;
 		}
 		if (type == TOKEN_NL)
+		{
+			inFact = false;
 			nb_line++;
+		}
+		if (inFact && type == TOKEN_SYMBOL)
+		{
+			char val = token.getValue();
+			if (symbols.find(val) != symbols.end())
+				ParsingThrow(FACT_DUP_SYMB, nb_line);
+			symbols.insert(token.getValue());
+		}
+		if (inFact && type != TOKEN_SYMBOL)
+			ParsingThrow(FACT_NOT_SYMB, nb_line);
 	}
+	if (factFound == -1)
+		ParsingThrow(FACT_MISSING, -1);
+	return factFound;
+}
+
+int CheckQuery(Tvector Tokens)
+{
+	int queryFound = -1;
+	bool inQuery = false;
+	int nb_line = 0;
+	std::set<char> symbols;
+	for (Token token: Tokens)
+	{
+		Token_type type = token.getType();
+		if (type == TOKEN_QUERY)
+		{
+			if (queryFound >= 0)
+				ParsingThrow(QUERY_TOO_MANY, nb_line);
+			queryFound = nb_line;
+			inQuery = true ;
+			continue ;
+		}
+		if (type == TOKEN_NL)
+		{
+			inQuery = false;
+			nb_line++;
+		}
+		if (inQuery && type == TOKEN_SYMBOL)
+		{
+			char val = token.getValue();
+			if (symbols.find(val) != symbols.end())
+				ParsingThrow(QUERY_DUP_SYMB, nb_line);
+			symbols.insert(token.getValue());
+		}
+		if (inQuery && type != TOKEN_SYMBOL)
+			ParsingThrow(QUERY_NOT_SYMB, nb_line);
+	}
+	if (queryFound == -1)
+		ParsingThrow(QUERY_MISSING, -1);
+	return queryFound;
 }
 
 int GetGrammarRules(Token_type token)
 {
-	static const std::unordered_map<Token_type, int> grammarTable = {
+	static const std::map<Token_type, int> grammarTable = {
 		{TOKEN_START, TOKEN_SYMBOL | TOKEN_NOT | TOKEN_LP | TOKEN_QUERY | TOKEN_FACT},
-		{TOKEN_SYMBOL, TOKEN_XOR | TOKEN_OR | TOKEN_AND | TOKEN_IFF | TOKEN_THEN | TOKEN_NL | TOKEN_RP | TOKEN_SYMBOL},
+		{TOKEN_SYMBOL, TOKEN_XOR | TOKEN_OR | TOKEN_AND | TOKEN_COND | TOKEN_NL | TOKEN_RP | TOKEN_SYMBOL},
 		{TOKEN_NOT, TOKEN_SYMBOL | TOKEN_LP},
 		{TOKEN_XOR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},
 		{TOKEN_OR, TOKEN_NOT | TOKEN_SYMBOL | TOKEN_LP},
@@ -120,9 +165,9 @@ int GetGrammarRules(Token_type token)
 		{TOKEN_QUERY, TOKEN_SYMBOL},
 		{TOKEN_THEN, TOKEN_NOT | TOKEN_SYMBOL},
 		{TOKEN_IFF, TOKEN_LP | TOKEN_SYMBOL | TOKEN_NOT},
-		{TOKEN_FACT, TOKEN_SYMBOL},
+		{TOKEN_FACT, TOKEN_SYMBOL | TOKEN_NL},
 		{TOKEN_LP, TOKEN_NOT | TOKEN_SYMBOL},
-		{TOKEN_RP, TOKEN_THEN | TOKEN_IFF | TOKEN_OR | TOKEN_XOR | TOKEN_AND | TOKEN_NL},
+		{TOKEN_RP, TOKEN_COND | TOKEN_OR | TOKEN_XOR | TOKEN_AND | TOKEN_NL},
 		{TOKEN_NL, TOKEN_SYMBOL | TOKEN_LP | TOKEN_NOT | TOKEN_FACT | TOKEN_QUERY | TOKEN_END},
 	};
 
@@ -132,7 +177,7 @@ int GetGrammarRules(Token_type token)
 	return 0;
 }
 
-void CheckGrammar(std::vector<Token> &Tokens)
+void CheckGrammar(Tvector &Tokens)
 {
 	int nb_line = 0;
 	Token Current;
@@ -144,7 +189,7 @@ void CheckGrammar(std::vector<Token> &Tokens)
 		if (!(GetGrammarRules(Current.getType()) & Next.getType()))
 		{
 			std::ostringstream oss;
-			oss << "Unexpected token: " << Next.getValue();
+			oss << UNEXP_TKN << Next.getValue();
 			ParsingThrow(oss.str(), nb_line);
 		}
 		if (Next.getType() == TOKEN_END)

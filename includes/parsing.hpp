@@ -11,18 +11,15 @@
 /* ************************************************************************** */
 #pragma once
 
+#include <ostream>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <macro.hpp>
+#include <fstream>
 
-#define SETGET(type, _name, Name) 											\
-	public: 																\
-		inline void set##Name(const type &value) { this->_name = value; }	\
-		inline type get##Name(void) const { return this->_name; }			\
-	private:																\
-		type _name;															\
 
 typedef enum
 {
@@ -31,6 +28,7 @@ typedef enum
 	TOKEN_SYMBOL = 1 << 1,
 	TOKEN_THEN = 1 << 2,
 	TOKEN_IFF = 1 << 3,
+	TOKEN_COND = TOKEN_THEN | TOKEN_IFF,
 	TOKEN_XOR = 1 << 4,
 	TOKEN_AND = 1 << 5,
 	TOKEN_OR = 1 << 6,
@@ -39,6 +37,7 @@ typedef enum
 	TOKEN_NL = 1 << 9,
 	TOKEN_LP = 1 << 10,
 	TOKEN_RP = 1 << 11,
+	TOKEN_PAR = TOKEN_LP | TOKEN_RP,
 	TOKEN_START = 1 << 12,
 	TOKEN_END = 1 << 13,
 }	Token_type;
@@ -108,10 +107,22 @@ class Token
 			_value = c;
 		};
 		~Token() {};
+
+		inline bool isOperator() const { return _type & (TOKEN_XOR | TOKEN_AND | TOKEN_OR | TOKEN_NOT | TOKEN_THEN | TOKEN_IFF); }
+		inline bool isSymbol() const { return _type & TOKEN_SYMBOL; }
+		inline bool operator&(const int mask) const { return _type & mask; }
 };
+typedef std::vector<Token> Tvector;
 inline std::ostream &operator<<(std::ostream &os, const Token &token) {
 	os << "Token type : " << token.toString() << std::endl;
 	os << "Token value : " << token.getValue() << std::endl;
+	return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const Tvector &Tokens) {
+	for (Token token : Tokens)
+		os << token.getValue();
+	os << std::endl;
 	return os;
 }
 
@@ -174,16 +185,23 @@ inline int isRP(std::string str)
 	return (str[0] == ')');
 }
 
-
 inline void ParsingThrow(const std::string& msg, int line)
 {
 	std::ostringstream oss;
-	oss << msg << " at line " << line;
+	if (line != -1)
+		oss << msg << " at line " << line;
+	else
+		oss << msg;
 	throw std::runtime_error(oss.str());
 }
 
+class System;
+
 void CheckConditionalToken(std::vector<Token> &Tokens);
-void Tokenizer(std::ifstream& file, std::vector<Token>& Tokens);
+void Tokenizer(std::ifstream& file, std::vector<Token> &Tokens);
 void GrammarVerifyPar(std::vector<Token> &Tokens);
-void CheckFactQueryToken(std::vector<Token> Tokens);
+int CheckFact(std::vector<Token> Tokens);
+int CheckQuery(std::vector<Token> Tokens);
 void CheckGrammar(std::vector<Token> &Tokens);
+std::ifstream openFile(char *filename);
+void Parser(System &System, std::ifstream &file);
